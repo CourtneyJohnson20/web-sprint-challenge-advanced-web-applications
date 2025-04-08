@@ -18,29 +18,17 @@ export default function App() {
   const [spinnerOn, setSpinnerOn] = useState(false)
   const [temp, setTemp] = useState('')
 
-  // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate()
   const redirectToLogin = () => { navigate('/')}
   const redirectToArticles = () => { navigate('/articles') }
 
   const logout = () => {
-    // ✨ implement
-    // If a token is in local storage it should be removed,
-    // and a message saying "Goodbye!" should be set in its proper state.
-    // In any case, we should redirect the browser back to the login screen,
-    // using the helper above.
     localStorage.removeItem('token')
     setMessage('Goodbye!')
     navigate('/')
   }
 
   const login = async ({ username, password }) => {
-    // ✨ implement
-    // We should flush the message state, turn on the spinner
-    // and launch a request to the proper endpoint.
-    // On success, we should set the token to local storage in a 'token' key,
-    // put the server success message in its proper state, and redirect
-    // to the Articles screen. Don't forget to turn off the spinner!
     setMessage('')
     setSpinnerOn(true)
     try {
@@ -59,16 +47,8 @@ export default function App() {
   }
 
   const getArticles = async () => {
-    // ✨ implement
-    // We should flush the message state, turn on the spinner
     setMessage('')
     setSpinnerOn(!spinnerOn)
-    // and launch an authenticated request to the proper endpoint.
-    // On success, we should set the articles in their proper state and
-    // put the server success message in its proper state.
-    // If something goes wrong, check the status of the response:
-    // if it's a 401 the token might have gone bad, and we should redirect to login.
-    // Don't forget to turn off the spinner!
     const token = localStorage.getItem('token')
     if (!token) {
       logout()
@@ -95,7 +75,7 @@ export default function App() {
 
   const postArticle = async (article) => {
     setMessage('')
-    setSpinnerOn(true) // turn on the spinner
+    setSpinnerOn(true)
     const token = localStorage.getItem('token')
     if (!token) {
       logout()
@@ -106,43 +86,42 @@ export default function App() {
           { title: article.title, text: article.text, topic: article.topic }, // pass article properties directly
           { headers: { Authorization: token } }
         )
-        getArticles() // refresh the list of articles
-        setTemp(response.data.message) // set success message
+        getArticles() 
+        setTemp(response.data.message) 
       } catch (error) {
         if (error?.response?.status === 401) {
-          logout() // logout if token is invalid
+          logout() 
         }
       } finally {
-        setSpinnerOn(false) // turn off the spinner
+        setSpinnerOn(false) 
       }
     }
   }
   
 
   const updateArticle = async ({ article_id, article }) => {
-    setMessage('') // clear any existing messages
-    setSpinnerOn(true) // turn on the spinner
+    setMessage('') 
+    setSpinnerOn(true) 
     const token = localStorage.getItem('token')
     if (!token) {
-      logout() // log out if there's no token
+      logout() 
     } else {
       try {
         const response = await axios.put(
-          `${articlesUrl}/${article_id}`, // Use the article_id in the URL
-          { title: article.title, text: article.text, topic: article.topic }, // Send the updated article data
+          `${articlesUrl}/${article_id}`, 
+          { title: article.title, text: article.text, topic: article.topic }, 
           { headers: { Authorization: token } }
         )
-        // Refresh the articles list after updating the article
         getArticles()
-        setTemp(response.data.message) // set success message
+        setTemp(response.data.message) 
       } catch (error) {
         if (error?.response?.status === 401) {
-          logout() // logout if token is invalid
+          logout() 
         } else {
-          //setMessage('An error occurred while updating the article')
+          setMessage('An error occurred while updating the article')
         }
       } finally {
-        setSpinnerOn(false) // turn off the spinner
+        setSpinnerOn(false) 
       }
     }
   }

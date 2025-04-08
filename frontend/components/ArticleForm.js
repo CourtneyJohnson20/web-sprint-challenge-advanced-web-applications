@@ -5,12 +5,10 @@ const initialFormValues = { title: '', text: '', topic: '' }
 
 export default function ArticleForm(props) {
   const [values, setValues] = useState(initialFormValues)
-  // ✨ where are my props? Destructure them here
-  const { updateArticle, articles, currentArticleId, postArticle } = props
+  const { setCurrentArticleId, updateArticle, articles, currentArticleId, postArticle } = props
 
     useEffect(() => {
       if (currentArticleId) {
-        // If there is a currentArticleId, find the article in the list and populate the form fields
         const currentArticle = articles.find(article => article.article_id === currentArticleId)
         if (currentArticle) {
           setValues({
@@ -20,7 +18,6 @@ export default function ArticleForm(props) {
           })
         }
       } else {
-        // Reset the form if there's no currentArticleId
         setValues(initialFormValues)
       }
     }, [currentArticleId, articles])
@@ -35,11 +32,12 @@ export default function ArticleForm(props) {
   const onSubmit = evt => {
     evt.preventDefault()
     if (currentArticleId) {
-      updateArticle({ article_id: currentArticleId, article: values }) // Call updateArticle if editing an existing article
+      updateArticle({ article_id: currentArticleId, article: values }) 
     } else {
-      postArticle(values) // Otherwise, create a new article
+      postArticle(values) 
     }
-    //setValues(initialFormValues) // Reset form after submission
+    setValues(initialFormValues)
+    setCurrentArticleId(null)
   }
   
 

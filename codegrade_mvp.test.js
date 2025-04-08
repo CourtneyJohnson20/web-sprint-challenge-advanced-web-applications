@@ -185,7 +185,7 @@ describe('Advanced Applications', () => {
       fireEvent.click(submitArticleBtn())
       // edits on the page
       await screen.findByText('Fancy Title', queryOptions, waitForOptions)
-      screen.getAllByText('Fancy text', queryOptions)
+      screen.getByText('Fancy text', queryOptions)
       expect(screen.getAllByText('Topic: React', queryOptions)).toHaveLength(2)
       // success message
       await screen.findByText('Nice update, Foo!', queryOptions, waitForOptions)
