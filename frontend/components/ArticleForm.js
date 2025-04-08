@@ -6,25 +6,26 @@ const initialFormValues = { title: '', text: '', topic: '' }
 export default function ArticleForm(props) {
   const [values, setValues] = useState(initialFormValues)
   // ✨ where are my props? Destructure them here
-  const { currentArticleId, setCurrentArticleId, postArticle } = props
+  const { updateArticle, articles, currentArticleId, postArticle } = props
 
-  useEffect(() => {
-    // ✨ implement
-    // Every time the `currentArticle` prop changes, we should check it for truthiness:
-    // if it's truthy, we should set its title, text and topic into the corresponding
-    // values of the form. If it's not, we should reset the form back to initial values.
-    if (!currentArticleId) {
-      //console.log(currentArticleId)
-    } else {
-      setValues({
-        ...values,
-        title: currentArticleId.title,
-        text: currentArticleId.text,
-        topic: currentArticleId.topic
-      })
-
-    }
-  })
+    useEffect(() => {
+      if (currentArticleId) {
+        // If there is a currentArticleId, find the article in the list and populate the form fields
+        const currentArticle = articles.find(article => article.article_id === currentArticleId)
+        if (currentArticle) {
+          setValues({
+            title: currentArticle.title,
+            text: currentArticle.text,
+            topic: currentArticle.topic
+          })
+        }
+      } else {
+        // Reset the form if there's no currentArticleId
+        setValues(initialFormValues)
+      }
+    }, [currentArticleId, articles])
+    
+    
 
   const onChange = evt => {
     const { id, value } = evt.target
@@ -33,24 +34,27 @@ export default function ArticleForm(props) {
 
   const onSubmit = evt => {
     evt.preventDefault()
-    //console.log(values)
-    postArticle({title: values.title, text: values.text, topic: values.topic})
-    setValues(initialFormValues)
-    // ✨ implement
-    // We must submit a new post or update an existing one,
-    // depending on the truthyness of the `currentArticle` prop.
+    if (currentArticleId) {
+      updateArticle({ article_id: currentArticleId, article: values }) // Call updateArticle if editing an existing article
+    } else {
+      postArticle(values) // Otherwise, create a new article
+    }
+    //setValues(initialFormValues) // Reset form after submission
   }
+  
 
   const isDisabled = () => {
-    // ✨ implement
-    // Make sure the inputs have some values
-    //if
-    if (values.title.length < 1 || values.text.length < 1 || values.topic !== 'JavaScript' || values.topic !== 'React' || values.topic !== 'Node') {
-      true
+    if (
+      values.title.length < 1 ||
+      values.text.length < 1 ||
+      !(values.topic === 'JavaScript' || values.topic === 'React' || values.topic === 'Node')
+    ) {
+      return true;
     } else {
-      return false
+      return false;
     }
   }
+  
 
   return (
     // ✨ fix the JSX: make the heading display either "Edit" or "Create"

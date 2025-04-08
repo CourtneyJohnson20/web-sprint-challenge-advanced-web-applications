@@ -95,56 +95,91 @@ export default function App() {
 
   const postArticle = async (article) => {
     setMessage('')
-    setSpinnerOn(!spinnerOn)
-    // ✨ implement
-    // The flow is very similar to the `getArticles` function.
-    // You'll know what to do! Use log statements or breakpoints
-    // to inspect the response from the server.
+    setSpinnerOn(true) // turn on the spinner
     const token = localStorage.getItem('token')
     if (!token) {
       logout()
-    }  else {
-      const postArt = async () => {
-        try {
-          const response = await axios.post(
-            articlesUrl,
-            { title: article.title, text: article.text, topic: article.topic  }, 
-            {headers: {Authorization: token}},
-          )
-          getArticles()
-          //setTemp(response.data.message)
-          console.log(response.data)
-          console.log(articles)
-        } catch (error) {
-          if (error?.response?.status === 401) {
-            logout()
-          }
-        } finally {
-          setSpinnerOn(!spinnerOn)
+    } else {
+      try {
+        const response = await axios.post(
+          articlesUrl,
+          { title: article.title, text: article.text, topic: article.topic }, // pass article properties directly
+          { headers: { Authorization: token } }
+        )
+        getArticles() // refresh the list of articles
+        setTemp(response.data.message) // set success message
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          logout() // logout if token is invalid
         }
+      } finally {
+        setSpinnerOn(false) // turn off the spinner
       }
-      postArt()
-      setMessage(temp)
-      console.log(articles)
     }
-      
-    
   }
+  
 
-  const updateArticle = ({ article_id, article }) => {
-    // ✨ implement
-    // You got this!
+  const updateArticle = async ({ article_id, article }) => {
+    setMessage('') // clear any existing messages
+    setSpinnerOn(true) // turn on the spinner
+    const token = localStorage.getItem('token')
+    if (!token) {
+      logout() // log out if there's no token
+    } else {
+      try {
+        const response = await axios.put(
+          `${articlesUrl}/${article_id}`, // Use the article_id in the URL
+          { title: article.title, text: article.text, topic: article.topic }, // Send the updated article data
+          { headers: { Authorization: token } }
+        )
+        // Refresh the articles list after updating the article
+        getArticles()
+        setTemp(response.data.message) // set success message
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          logout() // logout if token is invalid
+        } else {
+          //setMessage('An error occurred while updating the article')
+        }
+      } finally {
+        setSpinnerOn(false) // turn off the spinner
+      }
+    }
   }
+  
 
-  const deleteArticle = article_id => {
-    // ✨ implement
+  const deleteArticle = async (article_id) => {
+    setMessage('') 
+    setSpinnerOn(true) 
+    const token = localStorage.getItem('token')
+    if (!token) {
+      logout() 
+    } else {
+      try {
+        const response = await axios.delete(`${articlesUrl}/${article_id}`, {
+          headers: { Authorization: token },
+        })
+        getArticles()
+        setTemp(response.data.message) 
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          logout() 
+        } else {
+          setMessage('An error occurred while deleting the article')
+        }
+      } finally {
+        setSpinnerOn(false) 
+      }
+    }
   }
+  
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <>
       <Spinner on={spinnerOn}/>
       <Message message={message}/>
+      <Message message={temp}/>
       <button id="logout" onClick={logout}>Logout from app</button>
       <div id="wrapper" style={{ opacity: spinnerOn ? "0.25" : "1" }}> {/* <-- do not change this line */}
         <h1>Advanced Web Applications</h1>
@@ -160,8 +195,17 @@ export default function App() {
                 setCurrentArticleId={setCurrentArticleId} 
                 postArticle={postArticle}
                 currentArticleId={currentArticleId}
+                articles={articles}
+                updateArticle={updateArticle}
               />
-              <Articles articles={articles} getArticles={getArticles} />
+              <Articles 
+              setCurrentArticleId={setCurrentArticleId} 
+              articles={articles} 
+              getArticles={getArticles}
+              deleteArticle={deleteArticle} 
+              updateArticle={updateArticle}
+              currentArticleId={currentArticleId}
+              />
             </>
           } />
         </Routes>
